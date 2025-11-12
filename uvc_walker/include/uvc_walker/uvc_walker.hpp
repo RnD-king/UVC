@@ -8,10 +8,13 @@
 
 // ====== 기구 파라미터 ======
 struct LegKinematics {
-  static constexpr float L_offset = 64.5f;
-  static constexpr float L_max    = 130.0f;
-  static constexpr float K_limit  = 129.0f;
+  static constexpr float L_offset = 63.3f;
+  static constexpr float L_max    = 250.0f;
+  static constexpr float K_limit  = 249.0f;
 };
+
+
+
 
 // ====== Dynamixel ID 매핑 (22축 완전판) ======
 struct DxlMap {
@@ -34,15 +37,15 @@ struct DxlMap {
   uint8_t waist_yaw      = 12;  // WEST
 
   // 오른팔 (U0/U1/U2/EW)
-  uint8_t arm_sh_yaw_R   = 13;
-  uint8_t arm_sh_pitch_R = 15;
-  uint8_t arm_sh_roll_R  = 17;
-  uint8_t arm_elbow_R    = 19;
+  uint8_t arm_sh_yaw_R   = 14;
+  uint8_t arm_sh_pitch_R = 16;
+  uint8_t arm_sh_roll_R  = 18;
+  uint8_t arm_elbow_R    = 20;
   // 왼팔
-  uint8_t arm_sh_yaw_L   = 14;
-  uint8_t arm_sh_pitch_L = 16;
-  uint8_t arm_sh_roll_L  = 18;
-  uint8_t arm_elbow_L    = 20;
+  uint8_t arm_sh_yaw_L   = 13;
+  uint8_t arm_sh_pitch_L = 15;
+  uint8_t arm_sh_roll_L  = 17;
+  uint8_t arm_elbow_L    = 19;
   //HEAD
   uint8_t head_yaw       = 21;  // HEAD1
   uint8_t head_pitch     = 22;  // HEAD2
@@ -65,6 +68,7 @@ private:
   dynamixel::PacketHandler* packetHandler_{nullptr};
   bool SetPosition(uint8_t id, float rad);
   void WriteAllTargets();
+  std::vector<uint8_t> dxl_ids_; 
 
   // ===== IMU =====
   float roll_{0.0f}, pitch_{0.0f};
@@ -74,7 +78,9 @@ private:
   int   mode_{710};
   int   jikuasi_{0};
   int   motCt_{100};
-  float HEIGHT_{185.0f};
+  float HEIGHT_{300.0f};
+
+
   float CHG_SVA_{1718.9f};
   float pitch_gyrg_{0.08f}, roll_gyrg_{0.10f};
   float dxi_{0}, dyi_{0}, dxis_{0}, dyis_{0};
@@ -82,11 +88,20 @@ private:
   float autoH_{HEIGHT_};
   float rollt_{0}, pitcht_{0};
   float fwct_{1}, fwctEnd_{18};
-  float fh_{0}, fhMax_{35};
+  float fh_{0}, fhMax_{50};
   float sw_{0}, swx_{0}, swy_{0}, swMax_{25};
   float landF_{0}, landB_{0};
   float wk_{0}, wt_{0};
   float WESTW_{0}, HEADW_{0};
+
+
+
+      // 균형용 내부 상태
+    float p_ofs_ = 0.0f;
+    float r_ofs_ = 0.0f;
+    float ipa_ = 0.0f, ira_ = 0.0f;
+    float ip_ = 0.0f, ir_ = 0.0f;
+
 
   // ===== 관절 변수 =====
   std::array<float,2> HW_{0,0};
@@ -113,6 +128,10 @@ private:
   inline float clampRadDelta(float desired, float current, float max_delta_rad); // 관절 회전속도 제한
   bool ready_logged_{false};  // 초기화 로그 1회만 출력
 
+
+  bool init_730_done_ = false;
+  bool imu_ready_ = false;
+  bool ik_ready_  = false;
 
   DxlMap id_;
 };
